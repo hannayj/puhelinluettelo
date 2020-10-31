@@ -71,10 +71,10 @@ const generateId = () => {
     return id
 }
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
-    if (!body.name) {
+    /*if (!body.name) {
         return response.status(400).json({
             error: 'name missing'
         })
@@ -90,17 +90,22 @@ app.post('/api/persons', (request, response) => {
         return response.status(400).json({
             error: 'name must be unique'
         })
-    }
+    }*/
 
     const person = new Person({
-        id: generateId(),
+        //id: generateId(),
         name: body.name,
         number: body.number
     })
 
-    person.save().then(savedPerson => {
-        response.json(savedPerson)
-    })
+    person
+        .save()
+        .then(savedPerson => savedPerson.toJSON())
+        .then(savedAndFormattedNote => {
+            response.json(savedAndFormattedNote)
+        })
+        .catch(error => next(error))
+
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
@@ -113,14 +118,14 @@ app.delete('/api/persons/:id', (request, response, next) => {
 
 app.put('/api/persons/:id', (request, response, next) => {
     const body = request.body
-    
+
     const person = {
         id: generateId(),
         name: body.name,
         number: body.number
     }
 
-    Person.findByIdAndUpdate(request.params.id, person, {new: true})
+    Person.findByIdAndUpdate(request.params.id, person, { new: true })
         .then(updatedPerson => {
             response.json(updatedPerson)
         })
@@ -136,8 +141,10 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, reposponse, next) => {
     console.log(error.message)
 
-    if (error.name === 'CastError' && error.kind == 'ObjectId') {
+    if (error.name === 'CastError') {
         return response.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
     }
 
     next(error)
