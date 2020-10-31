@@ -1,0 +1,7 @@
+PUT http://localhost:3001/api/persons/5f9d5ec5c3024238a825c6ba
+Content-Type: application/json
+
+{
+    "name": "Mikko Mallikas",
+    "number": "555-123 891"
+}
