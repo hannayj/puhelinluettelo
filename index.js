@@ -1,14 +1,17 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
+const Person = require('./models/person')
 const cors = require('cors')
 
 app.use(cors())
+
 app.use(express.json())
 app.use(express.static('build'))
 
-morgan.token('body', function (require, response) {
-    return JSON.stringify(require.body)
+morgan.token('body', function (request, response) {
+    return JSON.stringify(request.body)
 })
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
@@ -36,27 +39,34 @@ let persons = [
     }
 ]
 
-app.get('/', (require, response) => {
+app.get('/', (request, response) => {
     response.send('Puhelinluettelo')
 })
 
-app.get('/info', (require, response) => {
+app.get('/info', (request, response) => {
     response.send(`Phonebook has info for ${persons.length} people <p> ${new Date()} </p>`)
 })
 
-app.get('/api/persons', (require, response) => {
-    response.json(persons)
+app.get('/api/persons', (request, response) => {
+    Person.find({}).then(persons => {
+        response.json(persons)
+    })    
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
+    Person.findById(request.params.id).then(person => {
+        response.json(person)
+    })
+    
+    /*const id = Number(request.params.id)
     const person = persons.find(person => person.id === id)
+
 
     if (person) {
         response.json(person)
     } else {
         response.status(404).end()
-    }
+    }*/
 })
 
 const generateId = () => {
@@ -64,7 +74,7 @@ const generateId = () => {
     ? Math.max(...persons.map(p => p.id))
     : 0*/
 
-    const id = Math.floor(Math.random() * Math.floor(100))
+    const id = Math.floor(Math.random() * Math.floor(1000))
     //console.log(id)
     return id  //maxId + 1
 }
@@ -90,15 +100,18 @@ app.post('/api/persons', (request, response) => {
         })
     }
 
-    const person = {
+    const person = new Person({
         id: generateId(),
         name: body.name,
         number: body.number
-    }
+    })
 
-    persons = persons.concat(person)
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
+    //persons = persons.concat(person)
 
-    response.json(person)
+    //response.json(person)
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -108,7 +121,8 @@ app.delete('/api/persons/:id', (request, response) => {
     response.status(204).end()
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
