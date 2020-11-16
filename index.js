@@ -4,7 +4,6 @@ const morgan = require('morgan')
 const app = express()
 const Person = require('./models/person')
 const cors = require('cors')
-const { request, response } = require('express')
 
 app.use(cors())
 
@@ -17,28 +16,28 @@ morgan.token('body', function (request, response) {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
-let persons = [
+/*let persons = [
     {
-        "name": "Arto Hellas",
-        "number": "040-123456",
-        "id": 1
+        'name': 'Arto Hellas',
+        'number': '040-123456',
+        'id': 1
     },
     {
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523",
-        "id": 2
+        'name': 'Ada Lovelace',
+        'number': '39-44-5323523',
+        'id': 2
     },
     {
-        "name": "Dan Abramov",
-        "number": "12-43-234345",
-        "id": 3
+        'name': 'Dan Abramov',
+        'number': '12-43-234345',
+        'id': 3
     },
     {
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122",
-        "id": 4
+        'name': 'Mary Poppendieck',
+        'number': '39-23-6423122',
+        'id': 4
     }
-]
+]*/
 
 app.get('/', (request, response) => {
     response.send('Puhelinluettelo')
@@ -48,7 +47,6 @@ app.get('/info', (request, response) => {
     Person.estimatedDocumentCount().then(amount => {
         response.send(`Phonebook has info for ${amount} people <p> ${new Date()} </p>`)
     })
-    
 })
 
 app.get('/api/persons', (request, response) => {
