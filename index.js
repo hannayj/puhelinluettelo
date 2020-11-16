@@ -45,7 +45,10 @@ app.get('/', (request, response) => {
 })
 
 app.get('/info', (request, response) => {
-    response.send(`Phonebook has info for ${persons.length} people <p> ${new Date()} </p>`)
+    Person.estimatedDocumentCount().then(amount => {
+        response.send(`Phonebook has info for ${amount} people <p> ${new Date()} </p>`)
+    })
+    
 })
 
 app.get('/api/persons', (request, response) => {
